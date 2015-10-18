@@ -62,6 +62,7 @@ end
 
 def load_apartments(ad_type, request_params)
   apartments = []
+  session = Capybara::Session.new(:poltergeist)
 
   3.times.map do |page_number|
     sleep 1
@@ -69,9 +70,9 @@ def load_apartments(ad_type, request_params)
     puts @@url
     attempts = 1
     begin
-      Capybara.visit(@@url)
+      session.visit(@@url)
       begin
-        table = Capybara.page.find '#main_table'
+        table = session.find '#main_table'
         trs = table.all "tr[id^='tr_Ad_']"
         apartments += trs.map do |tr|
           cells = tr.all "td"
@@ -80,9 +81,11 @@ def load_apartments(ad_type, request_params)
       rescue Capybara::ElementNotFound
         []
       end
-    rescue StandardError
-      sleep 5 * attempts
+    rescue StandardError => e
+      puts "#{attempts} - #{e}"
+      #sleep 5 * attempts
       attempts += 1
+      session = Capybara::Session.new(:poltergeist)
       retry if attempts <= 3
     end
   end
