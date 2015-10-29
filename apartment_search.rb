@@ -61,20 +61,37 @@ def get_rss(ad_type)
 end
 
 def load_apartments(ad_type, request_params)
-  2.times.map do |page_number|
+  apartments = []
+
+  3.times.map do |page_number|
     @@url = create_url(ad_type, request_params, page_number + 1)
-    Capybara.visit(@@url)
+    puts @@url
+    attempts = 1
     begin
-      table = Capybara.page.find '#main_table'
-    rescue Capybara::ElementNotFound
-      raise "Couldn't find the ads table"
+      session = Capybara::Session.new(:poltergeist)
+      sleep 3
+      session.visit(@@url)
+      begin
+        table = session.find '#main_table'
+        trs = table.all "tr[id^='tr_Ad_']"
+        apartments += trs.map do |tr|
+          cells = tr.all "td"
+          Apartment.new(ad_type, cells)
+        end
+      rescue Capybara::ElementNotFound
+        raise "No elements found - Retry time!"
+      end
+    rescue StandardError => e
+      puts "#{attempts} - #{e}"
+      sleep 2
+      attempts += 1
+      retry if attempts <= 3
     end
-    trs = table.all "tr[id^='tr_Ad_']"
-    apartments = trs.map do |tr|
-      cells = tr.all "td"
-      Apartment.new(ad_type, cells)
-    end
-  end.flatten
+  end
+
+  puts apartments.flatten.length
+
+  apartments.flatten
 end
 
 def create_url(ad_type, params, page_number)
