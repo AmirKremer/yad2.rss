@@ -19,7 +19,7 @@ Capybara.current_driver = :poltergeist
 Capybara.configure do |config|
   config.ignore_hidden_elements = true
   config.visible_text_only = true
-  config.page.driver.add_headers( "User-Agent" =>
+  config.current_session.driver.add_headers( "User-Agent" =>
                                     "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1" )
 end
 
@@ -61,21 +61,42 @@ def get_rss(ad_type)
 end
 
 def load_apartments(ad_type, request_params)
-  @@url = create_url(ad_type, request_params)
-  Capybara.visit(@@url)
-  begin
-    table = Capybara.page.find '#main_table'
-  rescue Capybara::ElementNotFound
-    raise "Couldn't find the ads table"
+  apartments = []
+  session = Capybara::Session.new(:poltergeist)
+  session.driver.add_headers( "User-Agent" =>
+                                    "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1" )
+
+  3.times.map do |page_number|
+    sleep 1
+    @@url = create_url(ad_type, request_params, page_number + 1)
+    puts @@url
+    attempts = 1
+    begin
+      session.visit(@@url)
+      begin
+        table = session.find '#main_table'
+        trs = table.all "tr[id^='tr_Ad_']"
+        apartments += trs.map do |tr|
+          cells = tr.all "td"
+          Apartment.new(ad_type, cells)
+        end
+      rescue Capybara::ElementNotFound
+        []
+      end
+    rescue StandardError => e
+      puts "#{attempts} - #{e}"
+      #sleep 5 * attempts
+      attempts += 1
+      session = Capybara::Session.new(:poltergeist)
+      retry if attempts <= 3
+    end
   end
-  trs = table.all "tr[id^='tr_Ad_']"
-  trs.map do |tr|
-    cells = tr.all "td"
-    Apartment.new(ad_type, cells)
-  end
+
+  apartments.flatten
 end
 
-def create_url(ad_type, params)
+def create_url(ad_type, params, page_number)
+  params["Page"] = page_number
   uri = Addressable::URI.new
   uri.host = 'www.yad2.co.il'
   uri.path = "/Nadlan/#{ad_type}.php"
@@ -96,8 +117,7 @@ class Apartment
   end
 
   def apartment_for_rent(cells)
-    link = "http://www.yad2.co.il/" +
-      cells[21].all("a").last['href'].to_s
+    link = cells[21].all("a").last['href'].to_s
     puts link
 
     {
