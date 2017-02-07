@@ -4,13 +4,14 @@ GEM
     addressable (2.3.4)
     backports (3.3.3)
     builder (3.2.0)
-    capybara (2.1.0)
+    capybara (2.12.0)
+      addressable
       mime-types (>= 1.16)
       nokogiri (>= 1.3.3)
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
-    cliver (0.2.2)
+    cliver (0.3.2)
     coderay (1.0.9)
     daemons (1.1.9)
     eventmachine (1.0.3)
@@ -18,24 +19,22 @@ GEM
       tilt
     logger (1.2.8)
     method_source (0.8.1)
-    mime-types (1.23)
-    mini_portile (0.5.1)
-    multi_json (1.8.2)
-    nokogiri (1.6.0)
-      mini_portile (~> 0.5.0)
-    poltergeist (1.4.1)
-      capybara (~> 2.1.0)
-      cliver (~> 0.2.1)
-      multi_json (~> 1.0)
+    mime-types (2.99.3)
+    mini_portile2 (2.1.0)
+    nokogiri (1.6.8.1)
+      mini_portile2 (~> 2.1.0)
+    poltergeist (1.13.0)
+      capybara (~> 2.1)
+      cliver (~> 0.3.1)
       websocket-driver (>= 0.2.0)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
       slop (~> 3.4)
-    rack (1.5.2)
+    rack (1.6.5)
     rack-protection (1.5.0)
       rack
-    rack-test (0.6.2)
+    rack-test (0.6.3)
       rack (>= 1.0)
     sinatra (1.4.3)
       rack (~> 1.4)
@@ -54,7 +53,9 @@ GEM
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
     tilt (1.4.1)
-    websocket-driver (0.3.1)
+    websocket-driver (0.6.5)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.2)
     xpath (2.0.0)
       nokogiri (~> 1.3)
 
@@ -67,8 +68,14 @@ DEPENDENCIES
   capybara
   haml
   logger
-  poltergeist (= 1.4.1)
+  poltergeist
   pry
   sinatra
   sinatra-contrib
   thin
+
+RUBY VERSION
+   ruby 1.9.3p551
+
+BUNDLED WITH
+   1.14.3

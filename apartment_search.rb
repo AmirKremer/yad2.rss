@@ -19,7 +19,7 @@ Capybara.current_driver = :poltergeist
 Capybara.configure do |config|
   config.ignore_hidden_elements = true
   config.visible_text_only = true
-  config.page.driver.add_headers( "User-Agent" =>
+  config.current_session.driver.add_headers( "User-Agent" =>
                                     "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1" )
 end
 
@@ -63,6 +63,8 @@ end
 def load_apartments(ad_type, request_params)
   apartments = []
   session = Capybara::Session.new(:poltergeist)
+  session.driver.add_headers( "User-Agent" =>
+                                    "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1" )
 
   3.times.map do |page_number|
     sleep 1
@@ -115,8 +117,7 @@ class Apartment
   end
 
   def apartment_for_rent(cells)
-    link = "http://www.yad2.co.il/" +
-      cells[21].all("a").last['href'].to_s
+    link = cells[21].all("a").last['href'].to_s
     puts link
 
     {
